@@ -1,4 +1,5 @@
-cabal-version:      3.0
+cabal-version:   3.0
+
 -- The cabal-version field refers to the version of the .cabal specification,
 -- and can be different from the cabal-install (the tool) version and the
 -- Cabal (the library) version you are using. As such, the Cabal (the library)
@@ -11,7 +12,7 @@ cabal-version:      3.0
 --   http://haskell.org/cabal/users-guide/
 --
 -- The name of the package.
-name:               edsl-examen
+name:            edsl-examen
 
 -- The package version.
 -- See the Haskell package versioning policy (PVP) for standards
@@ -20,7 +21,7 @@ name:               edsl-examen
 -- PVP summary:     +-+------- breaking API changes
 --                  | | +----- non-breaking API additions
 --                  | | | +--- code changes with no API change
-version:            0.1.0.0
+version:         0.1.0.0
 
 -- A short (one-line) description of the package.
 -- synopsis:
@@ -29,75 +30,78 @@ version:            0.1.0.0
 -- description:
 
 -- The license under which the package is released.
-license:            MIT
+license:         MIT
 
 -- The file containing the license text.
-license-file:       LICENSE
+license-file:    LICENSE
 
 -- The package author(s).
-author:             Tomás Spognardi
+author:          Tomás Spognardi
 
 -- An email address to which users can send suggestions, bug reports, and patches.
-maintainer:         tomas.spognardi@gmail.com
+maintainer:      tomas.spognardi@gmail.com
 
 -- A copyright notice.
 -- copyright:
-build-type:         Simple
+build-type:      Simple
 
 -- Extra doc files to be distributed with the package, such as a CHANGELOG or a README.
-extra-doc-files:    CHANGELOG.md
+extra-doc-files: CHANGELOG.md
 
 -- Extra source files to be distributed with the package, such as examples, or a tutorial module.
 -- extra-source-files:
 
 common warnings
-    ghc-options: -Wall
+  ghc-options: -Wall
 
 library
-    -- Import common warning flags.
-    import:           warnings
+  -- Import common warning flags.
+  import:           warnings
 
-    -- Modules exported by the library.
-    exposed-modules:  MyLib
+  -- Modules exported by the library.
+  exposed-modules:
+    ShallowEmbedding
 
-    -- Modules included in this library but not exported.
-    -- other-modules:
+  -- Modules included in this library but not exported.
+  -- other-modules:
 
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+  -- LANGUAGE extensions used by modules in this package.
+  -- other-extensions:
 
-    -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.17.2.1
+  -- Other library packages from which modules are imported.
+  build-depends:    base ^>=4.17.2.1
 
-    -- Directories containing source files.
-    hs-source-dirs:   src
+  -- Directories containing source files.
+  hs-source-dirs:   src
 
-    -- Base language which the package is written in.
-    default-language: Haskell2010
+  -- Base language which the package is written in.
+  default-language: Haskell2010
 
 test-suite edsl-examen-test
-    -- Import common warning flags.
-    import:           warnings
+  -- Import common warning flags.
+  import:           warnings
 
-    -- Base language which the package is written in.
-    default-language: Haskell2010
+  -- Base language which the package is written in.
+  default-language: Haskell2010
 
-    -- Modules included in this executable, other than Main.
-    -- other-modules:
+  -- LANGUAGE extensions used by modules in this package.
+  -- other-extensions:
 
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+  -- The interface type and version of the test suite.
+  type:             exitcode-stdio-1.0
 
-    -- The interface type and version of the test suite.
-    type:             exitcode-stdio-1.0
+  -- Directories containing source files.
+  hs-source-dirs:   test
 
-    -- Directories containing source files.
-    hs-source-dirs:   test
+  -- The entrypoint to the test suite.
+  main-is:          Main.hs
+  other-modules:
+    ShallowEmbeddingTests
 
-    -- The entrypoint to the test suite.
-    main-is:          Main.hs
-
-    -- Test dependencies.
-    build-depends:
-        base ^>=4.17.2.1,
-        edsl-examen
+  -- Test dependencies.
+  build-depends:
+    , base         ^>=4.17.2.1
+    , edsl-examen
+    , HUnit        ^>=1.6
+    , tasty        ^>=1.5
+    , tasty-hunit  ^>=0.10
