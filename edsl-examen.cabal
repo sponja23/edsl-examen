@@ -60,6 +60,7 @@ library
 
   -- Modules exported by the library.
   exposed-modules:
+    DeepEmbedding
     ShallowEmbedding
 
   -- Modules included in this library but not exported.
@@ -96,6 +97,7 @@ test-suite edsl-examen-test
   -- The entrypoint to the test suite.
   main-is:          Main.hs
   other-modules:
+    DeepEmbeddingTests
     ShallowEmbeddingTests
 
   -- Test dependencies.

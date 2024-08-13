@@ -1,5 +1,6 @@
 module Main (main) where
 
+import DeepEmbeddingTests (deepTests)
 import ShallowEmbeddingTests (shallowTests)
 import Test.Tasty (defaultMain, testGroup)
 
@@ -8,4 +9,4 @@ main =
   defaultMain $
     testGroup
       "Tests"
-      [shallowTests]
+      [shallowTests, deepTests]
