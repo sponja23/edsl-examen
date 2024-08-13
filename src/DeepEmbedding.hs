@@ -1,7 +1,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 
-module DeepEmbedding (Expr (..), eval) where
+module DeepEmbedding (Expr (..), eval, showExpr) where
 
 import Data.Kind (Type)
 
@@ -21,3 +21,12 @@ eval (Lt x y) = eval x < eval y
 eval (Not x) = not (eval x)
 eval (And x y) = eval x && eval y
 eval (Or x y) = eval x || eval y
+
+-- | Representación de expresión como string
+showExpr :: Expr t -> String
+showExpr (Val x) = show x
+showExpr (Eq x y) = "(" ++ showExpr x ++ "=" ++ showExpr y ++ ")"
+showExpr (Lt x y) = "(" ++ showExpr x ++ "<" ++ showExpr y ++ ")"
+showExpr (Not x) = "~" ++ showExpr x
+showExpr (And x y) = "(" ++ showExpr x ++ "/\\" ++ showExpr y ++ ")"
+showExpr (Or x y) = "(" ++ showExpr x ++ "\\/" ++ showExpr y ++ ")"

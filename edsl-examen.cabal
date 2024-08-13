@@ -99,6 +99,7 @@ test-suite edsl-examen-test
   other-modules:
     DeepEmbeddingTests
     ShallowEmbeddingTests
+    ShowTests
 
   -- Test dependencies.
   build-depends:

@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module ShallowEmbedding (Expr (..), eval) where
+module ShallowEmbedding (Expr (..), eval, showExpr) where
 
 import Control.Applicative (Applicative (liftA2))
 
@@ -19,6 +19,10 @@ newtype Eval t = Eval t deriving (Functor)
 
 instance Applicative Eval where
   pure = Eval
+
+  -- El tipo Eval (a -> b) es inválido en términos de la clase Expr, pero es
+  -- cómodo para definir la instancia Expr Eval. Además, valores de ese tipo
+  -- no se pueden construir, ya que no se exporta el constructor de Eval.
   Eval f <*> Eval x = Eval (f x)
 
 instance Expr Eval where
@@ -32,3 +36,18 @@ instance Expr Eval where
 -- | Evaluar una expresión
 eval :: Eval t -> t
 eval (Eval x) = x
+
+-- | Representación de expresión como string
+newtype ShowExpr t = ShowExpr String deriving (Functor)
+
+instance Expr ShowExpr where
+  val = ShowExpr . show
+  eq (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "=" ++ y ++ ")"
+  lt (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "<" ++ y ++ ")"
+  not (ShowExpr x) = ShowExpr $ "~" ++ x
+  and (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "/\\" ++ y ++ ")"
+  or (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "\\/" ++ y ++ ")"
+
+-- | Mostrar una expresión
+showExpr :: ShowExpr t -> String
+showExpr (ShowExpr x) = x
