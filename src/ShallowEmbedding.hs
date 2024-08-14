@@ -3,7 +3,7 @@
 
 module ShallowEmbedding (Expr (..), eval, showExpr, parseExpr) where
 
-import Control.Applicative (Alternative (many, (<|>)), Applicative (liftA2))
+import Control.Applicative (Alternative ((<|>)), Applicative (liftA2))
 import Data.Functor (($>))
 import Parser
 import Prelude hiding (and, not, or)
@@ -75,8 +75,8 @@ showExpr (ShowExpr x) = x
 parseExpr :: (Expr e) => String -> Maybe (e Bool)
 parseExpr = runParser pProp
   where
-    pProp = foldl or <$> pTerm <*> many (pStr "\\/" *> pTerm)
-    pTerm = foldl and <$> pFactor <*> many (pStr "/\\" *> pFactor)
+    pProp = foldl1 or <$> pChain pTerm "\\/"
+    pTerm = foldl1 and <$> pChain pFactor "/\\"
     pFactor = pNot <|> pParens
     pNot = not <$> (pStr "~" *> pProp)
     pParens = pSym '(' *> (pForm <|> pProp) <* pSym ')'
