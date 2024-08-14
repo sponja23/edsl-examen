@@ -1,11 +1,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 
-module DeepEmbedding (Expr (..), eval, showExpr, parseExpr) where
+module DeepEmbedding (Expr (..), showExpr, eval, parseExpr) where
 
 import Data.Kind (Type)
 import qualified ShallowEmbedding as SE
 
+-- | Deep embedding de expresiones de comparación
 data Expr :: (Type -> Type) where
   Val :: Int -> Expr Int
   Eq :: Expr Int -> Expr Int -> Expr Bool
@@ -17,33 +18,12 @@ data Expr :: (Type -> Type) where
 -- Instancia de Eq para comparar expresiones, usada en los tests
 instance Eq (Expr t) where
   Val x == Val y = x == y
-  Eq x y == Eq x' y' = x == x' && y == y'
-  Lt x y == Lt x' y' = x == x' && y == y'
-  Not x == Not x' = x == x'
-  And x y == And x' y' = x == x' && y == y'
-  Or x y == Or x' y' = x == x' && y == y'
+  x `Eq` y == x' `Eq` y' = x == x' && y == y'
+  x `Lt` y == x' `Lt` y' = x == x' && y == y'
+  Not x == Not y = x == y
+  x `And` y == x' `And` y' = x == x' && y == y'
+  x `Or` y == x' `Or` y' = x == x' && y == y'
   _ == _ = False
-
--- | Intérprete de comparaciones
-eval :: Expr t -> t
-eval (Val x) = x
-eval (Eq x y) = eval x == eval y
-eval (Lt x y) = eval x < eval y
-eval (Not x) = not (eval x)
-eval (And x y) = eval x && eval y
-eval (Or x y) = eval x || eval y
-
--- | Representación de expresión como string
-showExpr :: Expr t -> String
-showExpr (Val x) = show x
-showExpr (Eq x y) = "(" ++ showExpr x ++ "=" ++ showExpr y ++ ")"
-showExpr (Lt x y) = "(" ++ showExpr x ++ "<" ++ showExpr y ++ ")"
-showExpr (Not x) = "~" ++ showExpr x
-showExpr (And x y) = "(" ++ showExpr x ++ "/\\" ++ showExpr y ++ ")"
-showExpr (Or x y) = "(" ++ showExpr x ++ "\\/" ++ showExpr y ++ ")"
-
-instance Show (Expr t) where
-  show = showExpr
 
 -- | Intérprete de shallow embedding que produce un deep embedding
 instance SE.Expr Expr where
@@ -53,6 +33,28 @@ instance SE.Expr Expr where
   not = Not
   and = And
   or = Or
+
+-- | Permite "re-interpretar" una expresión de deep embedding como usando alguna
+-- implementación de shallow embedding. Esto implica que se puede re-utilizar
+-- el código de éste último para implementar funciones sobre deep embedding.
+toShallow :: (SE.Expr e) => Expr t -> e t
+toShallow (Val x) = SE.val x
+toShallow (x `Eq` y) = toShallow x `SE.eq` toShallow y
+toShallow (x `Lt` y) = toShallow x `SE.lt` toShallow y
+toShallow (Not x) = SE.not (toShallow x)
+toShallow (x `And` y) = toShallow x `SE.and` toShallow y
+toShallow (x `Or` y) = toShallow x `SE.or` toShallow y
+
+-- | Evaluar una expresión
+eval :: Expr t -> t
+eval = SE.eval . toShallow
+
+-- | Mostrar una expresión
+showExpr :: Expr t -> String
+showExpr = SE.showExpr . toShallow
+
+instance Show (Expr t) where
+  show = showExpr
 
 -- | Parser de expresiones de comparación
 --

@@ -46,11 +46,11 @@ newtype ShowExpr t = ShowExpr String deriving (Functor)
 
 instance Expr ShowExpr where
   val = ShowExpr . show
-  eq (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "=" ++ y ++ ")"
-  lt (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "<" ++ y ++ ")"
+  (ShowExpr x) `eq` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "=" ++ y ++ ")"
+  (ShowExpr x) `lt` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "<" ++ y ++ ")"
   not (ShowExpr x) = ShowExpr $ "~" ++ x
-  and (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "/\\" ++ y ++ ")"
-  or (ShowExpr x) (ShowExpr y) = ShowExpr $ "(" ++ x ++ "\\/" ++ y ++ ")"
+  (ShowExpr x) `and` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "/\\" ++ y ++ ")"
+  (ShowExpr x) `or` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "\\/" ++ y ++ ")"
 
 -- | Mostrar una expresión
 showExpr :: ShowExpr t -> String
