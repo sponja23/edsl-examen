@@ -1,9 +1,13 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module ShallowEmbedding (Expr (..), eval, showExpr) where
+module ShallowEmbedding (Expr (..), eval, showExpr, parseExpr) where
 
-import Control.Applicative (Applicative (liftA2))
+import Control.Applicative (Alternative (many, (<|>)), Applicative (liftA2))
+import Data.Functor (($>))
+import Parser
+import Prelude hiding (and, not, or)
+import qualified Prelude (not)
 
 -- | Implementación tagless-final del lenguaje de comparaciones
 class Expr e where
@@ -51,3 +55,30 @@ instance Expr ShowExpr where
 -- | Mostrar una expresión
 showExpr :: ShowExpr t -> String
 showExpr (ShowExpr x) = x
+
+-- | Parser de expresiones de comparación.
+--
+-- Se parsea el siguiente lenguaje:
+--
+--    prop ::= term '\/' prop | term
+--
+--    term ::= factor '/\' term | factor
+--
+--    factor ::= '~' prop | '(' form ')' | '(' prop ')'
+--
+--    form ::= N '=' N | N '<' N
+--
+-- Éste es levemente distinto al de la consigna, ya que ese otro permite expresiones
+-- como ((1/\2)<(3\/4)), que no tienen sentido (ni tipan) en el lenguaje de comparaciones.
+--
+-- El tipo del resultado se debe poder inferir en cada llamada a la función.
+parseExpr :: (Expr e) => String -> Maybe (e Bool)
+parseExpr = runParser pProp
+  where
+    pProp = foldl or <$> pTerm <*> many (pStr "\\/" *> pTerm)
+    pTerm = foldl and <$> pFactor <*> many (pStr "/\\" *> pFactor)
+    pFactor = pNot <|> pParens
+    pNot = not <$> (pStr "~" *> pProp)
+    pParens = pSym '(' *> (pForm <|> pProp) <* pSym ')'
+    pForm = toComp <$> number <*> (pSym '=' $> eq <|> pSym '<' $> lt) <*> number
+    toComp x op y = val x `op` val y

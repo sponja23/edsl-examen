@@ -62,6 +62,7 @@ library
   exposed-modules:
     DeepEmbedding
     ShallowEmbedding
+    Parser
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -100,6 +101,7 @@ test-suite edsl-examen-test
     DeepEmbeddingTests
     ShallowEmbeddingTests
     ShowTests
+    ParseTests
 
   -- Test dependencies.
   build-depends:
