@@ -1,9 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Functor law" #-}
-
-module Parser
+module Parsing.Parser
   ( Parser,
     runParser,
     pFail,

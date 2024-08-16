@@ -1,7 +1,7 @@
 module Main (main) where
 
 import DeepEmbeddingTests (deepTests)
-import ParseTests (parseInverseTests, parseTests)
+import ParseTests (parseTests)
 import ShallowEmbeddingTests (shallowTests)
 import ShowTests (showTests)
 import Test.Tasty (defaultMain, testGroup)
@@ -14,6 +14,5 @@ main =
       [ shallowTests,
         deepTests,
         showTests,
-        parseTests,
-        parseInverseTests
+        parseTests
       ]

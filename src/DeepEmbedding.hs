@@ -1,7 +1,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
 
-module DeepEmbedding (Expr (..), showExpr, eval, parseExpr) where
+module DeepEmbedding (Expr (..), showExpr, eval) where
 
 import Data.Kind (Type)
 import qualified ShallowEmbedding as SE
@@ -55,10 +55,3 @@ showExpr = SE.showExpr . toShallow
 
 instance Show (Expr t) where
   show = showExpr
-
--- | Parser de expresiones de comparación
---
--- La implementación es una especialización de la implementación de shallow
--- embedding, ya que el parser de shallow embedding es más general.
-parseExpr :: String -> Maybe (Expr Bool)
-parseExpr = SE.parseExpr
