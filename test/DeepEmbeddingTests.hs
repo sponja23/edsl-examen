@@ -1,8 +1,9 @@
 module DeepEmbeddingTests (deepTests) where
 
-import qualified DeepEmbedding as DE
+import DeepEmbedding (Expr (..), eval)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
+import Prelude hiding (Eq)
 
 -- | Pruebas para el deep embedding de comparaciones
 deepTests :: TestTree
@@ -10,51 +11,51 @@ deepTests =
   testGroup
     "Deep Embedding"
     [ testCase "val" $
-        DE.eval (DE.Val 42)
+        eval (Val 42)
           @?= 42,
       testCase "eq1" $
-        DE.eval (DE.Val 42 `DE.Eq` DE.Val 42)
+        eval (Val 42 `Eq` Val 42)
           @?= True,
       testCase "eq2" $
-        DE.eval (DE.Val 42 `DE.Eq` DE.Val 43)
+        eval (Val 42 `Eq` Val 43)
           @?= False,
       testCase "lt1" $
-        DE.eval (DE.Val 42 `DE.Lt` DE.Val 43)
+        eval (Val 42 `Lt` Val 43)
           @?= True,
       testCase "lt2" $
-        DE.eval (DE.Val 42 `DE.Lt` DE.Val 42)
+        eval (Val 42 `Lt` Val 42)
           @?= False,
       testCase "not1" $
-        DE.eval (DE.Not trueExpr)
+        eval (Not trueExpr)
           @?= False,
       testCase "not2" $
-        DE.eval (DE.Not falseExpr)
+        eval (Not falseExpr)
           @?= True,
       testCase "and1" $
-        DE.eval (trueExpr `DE.And` trueExpr)
+        eval (trueExpr `And` trueExpr)
           @?= True,
       testCase "and2" $
-        DE.eval (trueExpr `DE.And` falseExpr)
+        eval (trueExpr `And` falseExpr)
           @?= False,
       testCase "and3" $
-        DE.eval (falseExpr `DE.And` trueExpr)
+        eval (falseExpr `And` trueExpr)
           @?= False,
       testCase "and4" $
-        DE.eval (falseExpr `DE.And` falseExpr)
+        eval (falseExpr `And` falseExpr)
           @?= False,
       testCase "or1" $
-        DE.eval (trueExpr `DE.Or` trueExpr)
+        eval (trueExpr `Or` trueExpr)
           @?= True,
       testCase "or2" $
-        DE.eval (trueExpr `DE.Or` falseExpr)
+        eval (trueExpr `Or` falseExpr)
           @?= True,
       testCase "or3" $
-        DE.eval (falseExpr `DE.Or` trueExpr)
+        eval (falseExpr `Or` trueExpr)
           @?= True,
       testCase "or4" $
-        DE.eval (falseExpr `DE.Or` falseExpr)
+        eval (falseExpr `Or` falseExpr)
           @?= False
     ]
   where
-    falseExpr = DE.Eq (DE.Val 42) (DE.Val 43)
-    trueExpr = DE.Eq (DE.Val 42) (DE.Val 42)
+    falseExpr = Eq (Val 42) (Val 43)
+    trueExpr = Eq (Val 42) (Val 42)

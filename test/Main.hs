@@ -1,6 +1,7 @@
 module Main (main) where
 
 import DeepEmbeddingTests (deepTests)
+import ExtendedEmbeddingTests (extendedTests)
 import ParseTests (parseTests)
 import ShallowEmbeddingTests (shallowTests)
 import ShowTests (showTests)
@@ -14,5 +15,6 @@ main =
       [ shallowTests,
         deepTests,
         showTests,
-        parseTests
+        parseTests,
+        extendedTests
       ]
