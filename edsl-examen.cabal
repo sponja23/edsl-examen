@@ -62,6 +62,7 @@ library
   exposed-modules:
     DeepEmbedding
     Extended.DeepEmbedding
+    Extended.ExprParser
     Extended.ShallowEmbedding
     Parsing.ExprParser
     Parsing.Parser

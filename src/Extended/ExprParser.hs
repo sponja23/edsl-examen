@@ -1,16 +1,11 @@
-{-# LANGUAGE GADTs #-}
-
-module Parsing.ExprParser (parseExprUntyped, parseExpr, UProp (..), eqTyped) where
+module Extended.ExprParser where
 
 import Control.Applicative (Alternative (..))
 import Data.Functor (($>))
-import qualified DeepEmbedding as DE
+import qualified Extended.ShallowEmbedding as ESE
 import Parsing.Parser
 import qualified ShallowEmbedding as SE
 
--- | Tipo del árbol de sintaxis de comparaciones.
---
--- Las expresiones representadas no necesariamente son bien tipadas.
 data UProp
   = UVal Int
   | UEq UProp UProp
@@ -18,17 +13,8 @@ data UProp
   | UNot UProp
   | UAnd UProp UProp
   | UOr UProp UProp
+  | UVar String
   deriving (Show, Eq)
-
--- | Comparación de expresiones no tipadas con el deep embedding.
-eqTyped :: UProp -> DE.Expr t -> Bool
-eqTyped (UVal x) (DE.Val x') = x == x'
-eqTyped (UEq x y) (DE.Eq x' y') = eqTyped x x' && eqTyped y y'
-eqTyped (ULt x y) (DE.Lt x' y') = eqTyped x x' && eqTyped y y'
-eqTyped (UNot x) (DE.Not x') = eqTyped x x'
-eqTyped (UAnd x y) (DE.And x' y') = eqTyped x x' && eqTyped y y'
-eqTyped (UOr x y) (DE.Or x' y') = eqTyped x x' && eqTyped y y'
-eqTyped _ _ = False
 
 -- | Parser de expresiones de comparación.
 --
@@ -38,7 +24,9 @@ eqTyped _ _ = False
 --
 --    term ::= factor '/\' term | factor
 --
---    factor ::= '~' prop | '(' prop ')' | '(' prop '=' prop ')' | '(' prop '<' prop ')' | N
+--    factor ::= '~' prop | '(' prop ')' | '(' prop '=' prop ')' | '(' prop '<' prop ')' | N | W
+--
+-- Donde W es una palabra formada por letras minúsculas.
 parseExprUntyped :: String -> Maybe UProp
 parseExprUntyped = runParser pProp
   where
@@ -48,7 +36,7 @@ parseExprUntyped = runParser pProp
     pTerm =
       foldl1 UAnd
         <$> pChain pFactor "/\\"
-    pFactor = pNot <|> pParens <|> pVal
+    pFactor = pNot <|> pParens <|> pVal <|> pVar
     pNot =
       UNot
         <$> (pStr "~" *> pProp)
@@ -60,6 +48,7 @@ parseExprUntyped = runParser pProp
         <*> pProp
     toComp x op y = x `op` y
     pVal = UVal <$> number
+    pVar = UVar <$> word
 
 -- | Parser de expresiones de comparación. Sólo admite expresiones bien tipadas.
 --
@@ -69,7 +58,7 @@ parseExprUntyped = runParser pProp
 --
 --    term ::= factor '/\' term | factor
 --
---    factor ::= '~' prop | '(' form ')' | '(' prop ')'
+--    factor ::= '~' prop | '(' form ')' | '(' prop ')' | W
 --
 --    form ::= N '=' N | N '<' N
 --
@@ -77,7 +66,7 @@ parseExprUntyped = runParser pProp
 -- como ((1/\2)<(3\/4)), que no tienen sentido (ni tipan) en el lenguaje de comparaciones.
 --
 -- El tipo del resultado se debe poder inferir en cada llamada a la función.
-parseExpr :: (SE.Expr e) => String -> Maybe (e Bool)
+parseExpr :: (ESE.VarExpr e) => String -> Maybe (e Bool)
 parseExpr = runParser pProp
   where
     pProp =
@@ -86,7 +75,7 @@ parseExpr = runParser pProp
     pTerm =
       foldl1 SE.and
         <$> pChain pFactor "/\\"
-    pFactor = pNot <|> pParens
+    pFactor = pNot <|> pParens <|> pVar
     pNot =
       SE.not
         <$> (pStr "~" *> pProp)
@@ -96,6 +85,5 @@ parseExpr = runParser pProp
         <$> number
         <*> (pSym '=' $> SE.eq <|> pSym '<' $> SE.lt)
         <*> number
-    -- Alternativa ilegible:
-    -- toComp = flip (`on` SE.val)
+    pVar = ESE.var <$> word
     toComp x op y = SE.val x `op` SE.val y

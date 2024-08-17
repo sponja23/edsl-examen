@@ -8,18 +8,20 @@ module Parsing.Parser
     pSucceed,
     pSat,
     pSym,
+    pStr,
     pList,
     pListP,
     pChain,
     digit,
     number,
-    pStr,
+    letter,
+    word,
   )
 where
 
 import Control.Applicative (Alternative (..))
 import Control.Monad (guard, (>=>))
-import Data.Char (isDigit)
+import Data.Char (isDigit, isLower)
 import Data.Foldable (Foldable (foldl'))
 
 -- | Parser aplicativo de listas de elementos de tipo s que produce valores de tipo a
@@ -89,8 +91,16 @@ digit = toInt <$> pSat isDigit
   where
     toInt c = fromEnum c - fromEnum '0'
 
--- | Parsea una secuencia de dígitos
+-- | Parsea un número entero
 number :: StringParser Int
 number = foldl' addDigit 0 <$> some digit
   where
     addDigit n d = n * 10 + d
+
+-- | Parsea una letra minúscula
+letter :: StringParser Char
+letter = pSat isLower
+
+-- | Parsea una palabra
+word :: StringParser String
+word = some letter

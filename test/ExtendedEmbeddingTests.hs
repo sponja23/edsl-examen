@@ -3,6 +3,7 @@
 module ExtendedEmbeddingTests (extendedTests) where
 
 import Extended.DeepEmbedding (Expr (..), eval, evalMaybe)
+import Extended.ExprParser (UProp (..), parseExprUntyped)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 
@@ -13,8 +14,11 @@ import Test.Tasty.HUnit (testCase, (@?=))
 extendedTests :: TestTree
 extendedTests =
   testGroup
-    "Deep Embedding Extendido"
-    [totalEvalTests, partialEvalTests]
+    "Embedding Extendido"
+    [ totalEvalTests,
+      partialEvalTests,
+      parseExprTests
+    ]
 
 -- | Pruebas de evaluación del deep embedding extendido con función de valuación total
 totalEvalTests :: TestTree
@@ -73,3 +77,26 @@ partialEvalTests =
     envXNothingYTrue = \case
       "y" -> Just True
       _ -> Nothing
+
+-- | Pruebas de parsing de expresiones de comparación con variables
+parseExprTests :: TestTree
+parseExprTests =
+  testGroup
+    "Parsing de expresiones con variables"
+    [ testCase "parse var" $
+        parseExprUntyped "x" @?= Just (UVar "x"),
+      testCase "parse and" $
+        parseExprUntyped "x/\\y" @?= Just (UVar "x" `UAnd` UVar "y"),
+      testCase "parse or" $
+        parseExprUntyped "x\\/y" @?= Just (UVar "x" `UOr` UVar "y"),
+      testCase "parse not" $
+        parseExprUntyped "~x" @?= Just (UNot (UVar "x")),
+      testCase "parse eq" $
+        parseExprUntyped "(x=y)" @?= Just (UVar "x" `UEq` UVar "y"),
+      testCase "parse lt" $
+        parseExprUntyped "(x<y)" @?= Just (UVar "x" `ULt` UVar "y"),
+      testCase "parse complex" $
+        parseExprUntyped "x/\\y\\/~z" @?= Just (UVar "x" `UAnd` UVar "y" `UOr` UNot (UVar "z")),
+      testCase "parse fail" $
+        parseExprUntyped "x/\\y\\/~z\\" @?= Nothing
+    ]
