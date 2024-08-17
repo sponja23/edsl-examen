@@ -63,3 +63,6 @@ evalMaybe = ESE.evalMaybe . toShallow
 -- | Mostrar una expresión
 evalWithVarMap :: Expr t -> [(String, Bool)] -> Maybe t
 evalWithVarMap = ESE.evalWithVarMap . toShallow
+
+instance Show (Expr t) where
+  show = ESE.showExpr . toShallow

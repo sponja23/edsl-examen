@@ -3,7 +3,7 @@
 module ExtendedEmbeddingTests (extendedTests) where
 
 import Extended.DeepEmbedding (Expr (..), eval, evalMaybe)
-import Extended.ExprParser (UProp (..), parseExprUntyped)
+import Extended.ExprParser (Ty (..), UProp (..), parseExprUntyped, typeProp)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 
@@ -17,7 +17,8 @@ extendedTests =
     "Embedding Extendido"
     [ totalEvalTests,
       partialEvalTests,
-      parseExprTests
+      parseExprTests,
+      typePropTests
     ]
 
 -- | Pruebas de evaluación del deep embedding extendido con función de valuación total
@@ -99,4 +100,25 @@ parseExprTests =
         parseExprUntyped "x/\\y\\/~z" @?= Just (UVar "x" `UAnd` UVar "y" `UOr` UNot (UVar "z")),
       testCase "parse fail" $
         parseExprUntyped "x/\\y\\/~z\\" @?= Nothing
+    ]
+
+-- | Pruebas para el tipado de expresiones de comparación
+typePropTests :: TestTree
+typePropTests =
+  testGroup
+    "Tipado de expresiones de comparación"
+    [ testCase "type val" $
+        typeProp TInt (UVal 1) @?= Val 1,
+      testCase "type eq" $
+        typeProp TBool (UVal 1 `UEq` UVal 2) @?= Val 1 `Eq` Val 2,
+      testCase "type lt" $
+        typeProp TBool (UVal 1 `ULt` UVal 2) @?= Val 1 `Lt` Val 2,
+      testCase "type not" $
+        typeProp TBool (UNot (UVar "x")) @?= Not (Var "x"),
+      testCase "type and" $
+        typeProp TBool (UVar "x" `UAnd` UVar "y") @?= Var "x" `And` Var "y",
+      testCase "type or" $
+        typeProp TBool (UVar "x" `UOr` UVar "y") @?= Var "x" `Or` Var "y",
+      testCase "type var" $
+        typeProp TBool (UVar "x") @?= Var "x"
     ]

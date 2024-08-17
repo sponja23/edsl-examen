@@ -40,7 +40,7 @@ eval :: Eval t -> t
 eval (Eval x) = x
 
 -- | Representación de expresión como string
-newtype ShowExpr t = ShowExpr String deriving (Functor)
+newtype ShowExpr t = ShowExpr String
 
 instance Expr ShowExpr where
   val = ShowExpr . show

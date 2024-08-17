@@ -1,7 +1,12 @@
-module Extended.ExprParser where
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+
+module Extended.ExprParser (UProp (..), parseExprUntyped, parseExpr, Ty (..), typeProp) where
 
 import Control.Applicative (Alternative (..))
 import Data.Functor (($>))
+import Data.Kind
+import qualified Extended.DeepEmbedding as EDE
 import qualified Extended.ShallowEmbedding as ESE
 import Parsing.Parser
 import qualified ShallowEmbedding as SE
@@ -87,3 +92,20 @@ parseExpr = runParser pProp
         <*> number
     pVar = ESE.var <$> word
     toComp x op y = SE.val x `op` SE.val y
+
+data Ty :: (Type -> Type) where
+  TInt :: Ty Int
+  TBool :: Ty Bool
+
+-- | Chequea el tipo de un UProp.
+--
+-- Si la expresión está bien tipada, devuelve el tipo de la misma.
+typeProp :: Ty t -> UProp -> EDE.Expr t
+typeProp TInt (UVal n) = EDE.Val n
+typeProp TBool (UEq x y) = typeProp TInt x `EDE.Eq` typeProp TInt y
+typeProp TBool (ULt x y) = typeProp TInt x `EDE.Lt` typeProp TInt y
+typeProp TBool (UNot x) = EDE.Not (typeProp TBool x)
+typeProp TBool (UAnd x y) = typeProp TBool x `EDE.And` typeProp TBool y
+typeProp TBool (UOr x y) = typeProp TBool x `EDE.Or` typeProp TBool y
+typeProp TBool (UVar s) = EDE.Var s
+typeProp _ _ = error "typeProp: tipo incorrecto"

@@ -1,4 +1,13 @@
-module Extended.ShallowEmbedding (VarExpr (..), eval, evalMaybe, evalWithVarMap, VariableEnv, PartialVariableEnv) where
+module Extended.ShallowEmbedding
+  ( VarExpr (..),
+    VariableEnv,
+    eval,
+    PartialVariableEnv,
+    evalMaybe,
+    evalWithVarMap,
+    showExpr,
+  )
+where
 
 import Control.Applicative (Applicative (liftA2))
 import ShallowEmbedding (Expr (..))
@@ -35,6 +44,10 @@ instance Expr EvalVar where
 instance VarExpr EvalVar where
   var x = EV ($ x)
 
+-- | Evaluar una expresión con variables
+eval :: EvalVar t -> VariableEnv -> t
+eval (EV x) = x
+
 -- | Valuación parcial de las variables de una expresión
 --
 -- Algunas variables pueden no tener un valor definido.
@@ -64,10 +77,6 @@ instance Expr MaybeEvalVar where
 instance VarExpr MaybeEvalVar where
   var x = MEV ($ x)
 
--- | Evaluar una expresión con variables
-eval :: EvalVar t -> VariableEnv -> t
-eval (EV x) = x
-
 -- | Evaluar una expresión con variables, donde algunas variables pueden no tener un valor definido
 evalMaybe :: MaybeEvalVar t -> PartialVariableEnv -> Maybe t
 evalMaybe (MEV x) = x
@@ -75,3 +84,21 @@ evalMaybe (MEV x) = x
 -- | Evaluar una expresión con variables, donde se provee un mapeo de variables a valores
 evalWithVarMap :: MaybeEvalVar t -> [(String, Bool)] -> Maybe t
 evalWithVarMap expr vars = evalMaybe expr (`lookup` vars)
+
+-- | Representación de expresión como string
+newtype ShowExpr t = ShowExpr String
+
+instance Expr ShowExpr where
+  val = ShowExpr . show
+  (ShowExpr x) `eq` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "=" ++ y ++ ")"
+  (ShowExpr x) `lt` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "<" ++ y ++ ")"
+  not (ShowExpr x) = ShowExpr $ "~" ++ x
+  (ShowExpr x) `and` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "/\\" ++ y ++ ")"
+  (ShowExpr x) `or` (ShowExpr y) = ShowExpr $ "(" ++ x ++ "\\/" ++ y ++ ")"
+
+instance VarExpr ShowExpr where
+  var = ShowExpr
+
+-- | Mostrar una expresión
+showExpr :: ShowExpr t -> String
+showExpr (ShowExpr x) = x
