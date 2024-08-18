@@ -40,6 +40,5 @@ test-suite edsl-examen-test
   build-depends:
     , base         ^>=4.17.2.1
     , edsl-examen
-    , HUnit        ^>=1.6
     , tasty        ^>=1.5
     , tasty-hunit  ^>=0.10
